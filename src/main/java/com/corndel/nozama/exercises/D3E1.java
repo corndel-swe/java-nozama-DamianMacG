@@ -26,14 +26,13 @@ class CounterController {
    * Responds with the current counter as a JSON object, e.g. { "count": 3 }.
    */
   public static void getCounter(Context ctx) {
-    // TODO
+    ctx.json(D3E1.counter);
   }
 
-  /**
-   * Increases the counter by 1 and then responds with the count.
-   */
   public static void increment(Context ctx) {
-    // TODO
+    D3E1.counter.setCount(D3E1.counter.getCount() + 1);
+
+    ctx.json(D3E1.counter);
   }
 }
 
