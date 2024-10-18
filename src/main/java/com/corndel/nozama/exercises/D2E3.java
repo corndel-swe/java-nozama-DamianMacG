@@ -10,12 +10,12 @@ import java.util.HashMap;
 public class D2E3 {
   /**
    * Creates a Javalin app with three endpoints:
-   * 
+   *
    * - GET /alarms responds with all alarms in the repository as JSON
    * - GET /alarms/{id} responds with the alarm with the given id as JSON
    * - POST /alarms creates a new alarm based on the request body
-   * 
-   * @see https://tech-docs.corndel.com/javalin/body-and-headers.html
+   *
+   * @see <a href="https://tech-docs.corndel.com/javalin/body-and-headers.html">...</a>
    * @return a configured Javalin instance
    */
   public static Javalin createApp() {
@@ -28,19 +28,24 @@ public class D2E3 {
     app.get(
         "/alarms",
         ctx -> {
-          // TODO
+          List<Alarm> alarms = AlarmRepository.findAll();
+          ctx.json(alarms);
         });
 
     app.get(
         "/alarms/{id}",
         ctx -> {
-          // TODO
+          int alarmId = Integer.parseInt(ctx.pathParam("id"));
+          Alarm alarm = AlarmRepository.findById(alarmId);
+          ctx.json(alarm);
         });
 
     app.post(
         "/alarms",
         ctx -> {
-          // TODO
+          Alarm newAlarm = ctx.bodyAsClass(Alarm.class);
+          Alarm createdAlarm = AlarmRepository.create(newAlarm.getTime(), newAlarm.getMessage());
+          ctx.status(201).json(createdAlarm);
         });
 
     return app;
