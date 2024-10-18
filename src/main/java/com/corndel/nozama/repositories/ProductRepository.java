@@ -17,7 +17,8 @@ public class ProductRepository {
 
             var products = new ArrayList<Product>();
             while (rs.next()) {
-                var id = rs.getString("id");
+                // Use getInt for id since it is INTEGER in the database
+                var id = rs.getInt("id");
                 var name = rs.getString("name");
                 var description = rs.getString("description");
                 var price = rs.getFloat("price");
@@ -26,18 +27,17 @@ public class ProductRepository {
 
                 products.add(new Product(id, name, description, price, stockQuantity, imageURL));
             }
-
             return products;
         }
     }
 
-    public static Product findById(String id) throws SQLException {
+    public static Product findById(int id) throws SQLException {
         var query = "SELECT id, name, description, price, stockQuantity, imageURL FROM products WHERE id = ?";
 
         try (var con = DB.getConnection();
              var stmt = con.prepareStatement(query)) {
 
-            stmt.setString(1, id);
+            stmt.setInt(1, id);
             try (var rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     var name = rs.getString("name");
@@ -48,40 +48,47 @@ public class ProductRepository {
 
                     return new Product(id, name, description, price, stockQuantity, imageURL);
                 } else {
-                    return null;
+                    return null; // Product not found
                 }
             }
         }
     }
 
     public static void createProduct(Product product) throws SQLException {
-        var query = "INSERT INTO products (id, name, description, price, stockQuantity, imageURL) VALUES (?, ?, ?, ?, ?, ?)";
+        var query = "INSERT INTO products (name, description, price, stockQuantity, imageURL) VALUES (?, ?, ?, ?, ?)";
 
         try (var con = DB.getConnection();
-             var stmt = con.prepareStatement(query)) {
-            stmt.setString(1, product.getId());
-            stmt.setString(2, product.getName());
-            stmt.setString(3, product.getDescription());
-            stmt.setFloat(4, product.getPrice());
-            stmt.setInt(5, product.getStockQuantity());
-            stmt.setString(6, product.getImageURL());
+             var stmt = con.prepareStatement(query, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setString(1, product.getName());
+            stmt.setString(2, product.getDescription());
+            stmt.setFloat(3, product.getPrice());
+            stmt.setInt(4, product.getStockQuantity());
+            stmt.setString(5, product.getImageURL());
 
-            stmt.executeUpdate();
+            int rowsAffected = stmt.executeUpdate();
+
+            try (var generatedKeys = stmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    product.setId(generatedKeys.getInt(1));
+                }
+            }
         }
     }
 
-    public static List<Product> findByCategory(String categoryId) throws SQLException {
-        var query = "SELECT p.id, p.name, p.description, p.price, p.stockQuantity, p.imageURL FROM products p " +
+
+    public static List<Product> findByCategory(int categoryId) throws SQLException {
+        var query = "SELECT p.id, p.name, p.description, p.price, p.stockQuantity, p.imageURL " +
+                "FROM products p " +
                 "JOIN product_categories pc ON p.id = pc.productId " +
                 "WHERE pc.categoryId = ?";
 
         try (var con = DB.getConnection();
              var stmt = con.prepareStatement(query)) {
-            stmt.setString(1, categoryId);
+            stmt.setInt(1, categoryId);
             try (var rs = stmt.executeQuery()) {
                 var products = new ArrayList<Product>();
                 while (rs.next()) {
-                    var id = rs.getString("id");
+                    var id = rs.getInt("id");
                     var name = rs.getString("name");
                     var description = rs.getString("description");
                     var price = rs.getFloat("price");
@@ -90,48 +97,8 @@ public class ProductRepository {
 
                     products.add(new Product(id, name, description, price, stockQuantity, imageURL));
                 }
-
                 return products;
             }
         }
     }
-
-
-    public static void main(String[] args) {
-        try {
-            // Test findAll
-//            System.out.println("All Products:");
-//            List<Product> products = findAll();
-//            for (Product product : products) {
-//                System.out.println(product);
-//            }
-
-            // Test findById
-            String productId = "300";
-            Product product = findById(productId);
-            if (product != null) {
-                System.out.println("Product found: " + product);
-            } else {
-                System.out.println("Product not found.");
-            }
-
-            // Test createProduct
-//            Product newProduct = new Product("300", "New Product", "This is a new product", 19.99f, 100, "http://example.com/image.jpg");
-//            createProduct(newProduct);
-//            System.out.println("Product created: " + newProduct);
-
-            // Test findByCategory
-//            String categoryId = "7";
-//            System.out.println("Products in Category " + categoryId + ":");
-//            List<Product> categoryProducts = findByCategory(categoryId);
-//            for (Product catProduct : categoryProducts) {
-//                System.out.println(catProduct);
-//            }
-
-        } catch (SQLException e) {
-            System.err.println("Error: " + e.getMessage());
-        }
-    }
-
 }
-

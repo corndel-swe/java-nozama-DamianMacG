@@ -1,3 +1,11 @@
+-- Drop existing tables if they exist
+DROP TABLE IF EXISTS product_categories;
+DROP TABLE IF EXISTS reviews;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS categories;
+DROP TABLE IF EXISTS products;
+
+-- Create tables
 CREATE TABLE IF NOT EXISTS products (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
@@ -40,3 +48,4 @@ CREATE TABLE IF NOT EXISTS reviews (
     FOREIGN KEY (productId) REFERENCES products (id) ON DELETE CASCADE,
     FOREIGN KEY (userId) REFERENCES users (id) ON DELETE CASCADE
 );
+

@@ -33,26 +33,23 @@ public class App {
             ctx.status(HttpStatus.IM_A_TEAPOT).json(user);
         });
 
+// User Routes
+      app.post("/users", UserController::createUser);
+      app.delete("/users/{userId}", UserController::deleteUser);
 
-    app.post("/users", UserController::createUser);
+// Product Routes
+      app.get("/products", ProductController::getAllProducts);
+      app.post("/products", ProductController::createProduct);
+      app.get("/products/{productId}", ProductController::getProductById);
+      app.get("/products/category/{categoryId}", ProductController::getProductsByCategory);
 
-    app.delete("/users/{userId}", UserController::deleteUser);
+// Product Detail and Review Routes
+      app.get("/products/{productId}/reviews", ReviewController::getReviewsByProduct);
+      app.post("/products/{productId}/reviews", ReviewController::postReview);
+      app.get("/products/{productId}/reviews/average", ReviewController::getAverageRating);
 
 
-app.get("/products/{productId}/reviews/average", ReviewController::getAverageRating);
-
-
-    app.get("/products/{productId}/reviews", ReviewController::getReviewsByProduct);
-
-
-
-    app.post("/products/{productId}/reviews", ReviewController::postReview);
-
-    app.get("/products", ProductController::getAllProducts);
-    app.get("/products/{id}", ProductController::getProductById);
-    app.post("/products", ProductController::createProduct);
-    app.get("/products/category/{categoryId}", ProductController::getProductsByCategory);
-    }
+  }
 
     public Javalin javalinApp() {
         return app;
